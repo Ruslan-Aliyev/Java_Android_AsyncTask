@@ -15,10 +15,12 @@
 
 #### AsyncTask
 
-- Caller thread is a UI Thread
-- No need to manipulate handlers, hence easier in this sense
+- Caller thread is a UI Thread. (The AsyncTask instance must be created and invoked in the UI thread.
+The methods overridden in the AsyncTask class should never be called. They're called automatically
+AsyncTask can be called only once. Executing it again will throw an exception)
 - For simple network operations which do not require downloading a lot of data
 - For disk-bound tasks that might take more than a few milliseconds
+- No need to manipulate handlers, hence easier in this sense
 
 Android AsyncTask is an abstract class provided by Android which gives us the liberty to perform heavy tasks in the background and keep the UI thread light thus making the application more responsive.
 
@@ -42,10 +44,6 @@ The three generic types used in an android AsyncTask class are given below :
 + Progress : The type of the progress units published during the background computation
 
 + Result : The type of the result of the background computation
-
-The AsyncTask instance must be created and invoked in the UI thread.
-The methods overridden in the AsyncTask class should never be called. They're called automatically
-AsyncTask can be called only once. Executing it again will throw an exception
 
 #### Handler 
 
