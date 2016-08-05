@@ -6,15 +6,17 @@
    * AsyncTask
    * Handler
 
-/*
-AsyncTask and Handler are written in Java (internally they use a Thread).
+#### Java Threads:
 
-The difference between Handler and AsyncTask is: Use AsyncTask when Caller thread is a UI Thread. No need to manipulate handlers, hence easier in that sense.
+- AsyncTask and Handler are written in Java (internally they use a Thread)
+- Network operations which involve moderate to large amounts of data (either uploading or downloading) 
+- High-CPU tasks which need to be run in the background
+- Any task where you want to control the CPU usage relative to the GUI thread 
 
-Handler is more transparent of the two and probably gives you more freedom/control.
+#### AsyncTask
 
-
-
+- Caller thread is a UI Thread
+- No need to manipulate handlers, hence easier in this sense
 
 Android AsyncTask is an abstract class provided by Android which gives us the liberty to perform heavy tasks in the background and keep the UI thread light thus making the application more responsive.
 
@@ -23,38 +25,37 @@ Android application runs on a single thread when launched. Due to this single th
 
 The basic methods used in an android AsyncTask class are defined below :
 
-doInBackground() : This method contains the code which needs to be executed in background. In this method we can send results multiple times to the UI thread by publishProgress() method. To notify that the background processing has been completed we just need to use the return statements
-onPreExecute() : This method contains the code which is executed before the background processing starts
-onPostExecute() : This method is called after doInBackground method completes processing. Result from doInBackground is passed to this method
-onProgressUpdate() : This method receives progress updates from doInBackground method, which is published via publishProgress method, and this method can use this progress update to update the UI thread
++ doInBackground() : This method contains the code which needs to be executed in background. In this method we can send results multiple times to the UI thread by publishProgress() method. To notify that the background processing has been completed we just need to use the return statements
 
++ onPreExecute() : This method contains the code which is executed before the background processing starts
+
++ onPostExecute() : This method is called after doInBackground method completes processing. Result from doInBackground is passed to this method
+
++ onProgressUpdate() : This method receives progress updates from doInBackground method, which is published via publishProgress method, and this method can use this progress update to update the UI thread
 
 The three generic types used in an android AsyncTask class are given below :
 
-Params : The type of the parameters sent to the task upon execution
-Progress : The type of the progress units published during the background computation
-Result : The type of the result of the background computation
++ Params : The type of the parameters sent to the task upon execution
 
++ Progress : The type of the progress units published during the background computation
+
++ Result : The type of the result of the background computation
 
 The AsyncTask instance must be created and invoked in the UI thread.
-The methods overridden in the AsyncTask class should never be called. They¡¦re called automatically
+The methods overridden in the AsyncTask class should never be called. They're called automatically
 AsyncTask can be called only once. Executing it again will throw an exception
- */
 
-/*
 Use AsyncTask for:
 
-Simple network operations which do not require downloading a lot of data
-Disk-bound tasks that might take more than a few milliseconds
+- Simple network operations which do not require downloading a lot of data
 
-Use Java threads for:
+- Disk-bound tasks that might take more than a few milliseconds
 
-Network operations which involve moderate to large amounts of data (either uploading or downloading)
-High-CPU tasks which need to be run in the background
-Any task where you want to control the CPU usage relative to the GUI thread
- */
+#### Handler 
 
-/*
+- More transparent, hence, more control
+
+```java
 public class ThreadExampleActivity extends ActionBarActivity {
 
     @Override
@@ -90,4 +91,4 @@ public class ThreadExampleActivity extends ActionBarActivity {
 
 	}
 }
- */
+```
