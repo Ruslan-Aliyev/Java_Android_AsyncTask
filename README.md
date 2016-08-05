@@ -1,3 +1,10 @@
+# This repository demostrates AsyncTask
+
+### There are also other ways of doing threads:
+
+ * Java Threads
+   * AsyncTask
+   * Handler
 
 /*
 AsyncTask and Handler are written in Java (internally they use a Thread).
@@ -30,7 +37,7 @@ Result : The type of the result of the background computation
 
 
 The AsyncTask instance must be created and invoked in the UI thread.
-The methods overridden in the AsyncTask class should never be called. They¡¦re called automatically
+The methods overridden in the AsyncTask class should never be called. TheyÂ¡Â¦re called automatically
 AsyncTask can be called only once. Executing it again will throw an exception
  */
 
