@@ -88,3 +88,114 @@ public class ThreadExampleActivity extends ActionBarActivity {
 	}
 }
 ```
+
+---------------------------------------
+
+# Thread
+• No IU
+• Dont destroy() nor stop() 
+• Do interrupt() or join() 
+
+Providing a new class that extends Thread and overriding its run() method:
+
+```java
+protected void someFunction(){
+	Thread t = new Thread(){
+		public void run(){
+			// ...
+		}
+	};
+	t.start();
+}
+```
+
+Providing a new Thread instance with a Runnable object during its creation:
+
+```java
+private static class RunnableObject implements Runnable{
+	public void run(){
+		// ...
+	}
+}
+public static void main(String args[]) throws InterruptedException {
+	Thread t = new Thread(new RunnableObject());
+	t.start();
+}
+```
+
+#### Notes regarding threads in Android
+
+`runOnUiThread`
+
+When you explicitly spawn a new thread to do work in the background, this code is not run on the UIThread. 
+If this background thread needs change the UI: use `runOnUiThread`. 
+Better to use a Handler.
+Handler provides these background threads the ability to execute code that can modify the UI. 
+Handler do this by putting the UI-modifying code in a Runnable object and passing it to the runOnUiThread method.
+
+https://developer.android.com/guide/components/processes-and-threads.html#WorkerThreads
+
+# Handler 
+
+• Associated with a single thread and that threads message queue 
+• Bound to the thread / message queue of the thread that is creating it 
+• Deliver messages and runnables to that message queue 
+• Execute them as they come out of the message queue
+
+Handler For:
+• To schedule messages and runnables to be executed as some point in the future
+• To add an action into a queue performed on a different thread
+
+```java
+public Handler h = new Handler(){
+	@override
+	public void handleMessage(Message msg){
+		// ...
+	}
+}
+Message message = h.obtainMessage("something", "");
+h.sendMessage(message);
+```
+
+# AsyncTask 
+
+• Created on the UI thread and can be executed only once 
+• Run on a background thread and result is published on the UI thread 
+• The three types used by an asynchronous task are the following 
+– Params, the type of the parameters sent to the task upon execution 
+– Progress, the type of the progress units published during the background computation 
+– Result, the type of the result of the background computation 
+• Extend AsyncTask<Void, Void, Void>
+
+AsyncTask goes through 4 steps: 
+
+– onPreExecute(): 
+invoked on the UI thread immediately after the task is executed 
+
+– doInBackground(Param ...): 
+invoked on the background thread immediately after onPreExecute() finishes executing 
+
+– onProgressUpdate(Progress...): 
+invoked on the UI thread after a call to publishProgress(Progress...) 
+
+– onPostExecute(Result): 
+invoked on the UI thread after the background computation finishes
+
+```java
+public class at extends AsyncTask< ArrayList<Item> , Void , ArrayList<Item> >{
+	@override
+	protected ArrayList<Item> doInBackground(ArrayList<Item>... params){
+		return itemList;
+	}
+	@override
+	protected void onProgressUpdate(Void... unused){
+	
+	}
+	@override
+	protected void onPostExecute(ArrayList<Item> sResponse){
+		// update ui
+	}
+}
+LoadItemList loadItemList = new LoadItemList();
+loadItemList.execute();
+```
