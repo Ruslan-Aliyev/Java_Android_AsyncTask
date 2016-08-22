@@ -8,10 +8,52 @@
 
 #### Java Threads:
 
-- AsyncTask and Handler are written in Java (internally they use a Thread)
+- AsyncTask and Handler internally they use Thread
 - Network operations which involve moderate to large amounts of data (either uploading or downloading) 
 - High-CPU tasks which need to be run in the background
 - Any task where you want to control the CPU usage relative to the GUI thread 
+- Cant touch IU
+- Dont destroy() nor stop() 
+- Do interrupt() or join() 
+
+Providing a new class that extends Thread and overriding its run() method:
+
+```java
+protected void someFunction(){
+	Thread t = new Thread(){
+		public void run(){
+			// ...
+		}
+	};
+	t.start();
+}
+```
+
+Providing a new Thread instance with a Runnable object during its creation:
+
+```java
+private static class RunnableObject implements Runnable{
+	public void run(){
+		// ...
+	}
+}
+public static void main(String args[]) throws InterruptedException {
+	Thread t = new Thread(new RunnableObject());
+	t.start();
+}
+```
+
+###### Notes regarding threads in Android
+
+`runOnUiThread`
+
+When you explicitly spawn a new thread to do work in the background, this code is not run on the UIThread. 
+If this background thread needs change the UI: use `runOnUiThread`. 
+Better to use a Handler.
+Handler provides these background threads the ability to execute code that can modify the UI. 
+Handler do this by putting the UI-modifying code in a Runnable object and passing it to the runOnUiThread method.
+
+https://developer.android.com/guide/components/processes-and-threads.html#WorkerThreads
 
 #### AsyncTask
 
@@ -49,7 +91,29 @@ The three generic types used in an android AsyncTask class are given below :
 
 #### Handler 
 
-- More transparent, hence, more control
+- Associated with a single thread and that threads message queue 
+- Bound to the thread / message queue of the thread that is creating it 
+- Deliver messages and runnables to that message queue 
+- Execute them as they come out of the message queue
+
+Handler For:
+- To schedule messages and runnables to be executed as some point in the future
+- To add an action into a queue performed on a different thread
+
+Simple example:
+
+```java
+public Handler h = new Handler(){
+	@override
+	public void handleMessage(Message msg){
+		// ...
+	}
+}
+Message message = h.obtainMessage("something", "");
+h.sendMessage(message);
+```
+
+Complex example:
 
 ```java
 public class ThreadExampleActivity extends ActionBarActivity {
@@ -91,73 +155,7 @@ public class ThreadExampleActivity extends ActionBarActivity {
 
 ---------------------------------------
 
-# Thread
-• No IU
-• Dont destroy() nor stop() 
-• Do interrupt() or join() 
-
-Providing a new class that extends Thread and overriding its run() method:
-
-```java
-protected void someFunction(){
-	Thread t = new Thread(){
-		public void run(){
-			// ...
-		}
-	};
-	t.start();
-}
-```
-
-Providing a new Thread instance with a Runnable object during its creation:
-
-```java
-private static class RunnableObject implements Runnable{
-	public void run(){
-		// ...
-	}
-}
-public static void main(String args[]) throws InterruptedException {
-	Thread t = new Thread(new RunnableObject());
-	t.start();
-}
-```
-
-#### Notes regarding threads in Android
-
-`runOnUiThread`
-
-When you explicitly spawn a new thread to do work in the background, this code is not run on the UIThread. 
-If this background thread needs change the UI: use `runOnUiThread`. 
-Better to use a Handler.
-Handler provides these background threads the ability to execute code that can modify the UI. 
-Handler do this by putting the UI-modifying code in a Runnable object and passing it to the runOnUiThread method.
-
-https://developer.android.com/guide/components/processes-and-threads.html#WorkerThreads
-
-# Handler 
-
-• Associated with a single thread and that threads message queue 
-• Bound to the thread / message queue of the thread that is creating it 
-• Deliver messages and runnables to that message queue 
-• Execute them as they come out of the message queue
-
-Handler For:
-• To schedule messages and runnables to be executed as some point in the future
-• To add an action into a queue performed on a different thread
-
-```java
-public Handler h = new Handler(){
-	@override
-	public void handleMessage(Message msg){
-		// ...
-	}
-}
-Message message = h.obtainMessage("something", "");
-h.sendMessage(message);
-```
-
-# AsyncTask 
+###### AsyncTask another explanation
 
 • Created on the UI thread and can be executed only once 
 • Run on a background thread and result is published on the UI thread 
