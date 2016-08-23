@@ -70,24 +70,43 @@ Android AsyncTask is an abstract class provided by Android which gives us the li
 
 Android application runs on a single thread when launched. Due to this single thread model tasks that take longer time to fetch the response can make the application non-responsive. To avoid this we use android AsyncTask to perform the heavy tasks in background on a dedicated thread and passing the results back to the UI thread. Hence use of AsyncTask in android application keeps the UI thread responsive at all times.
 
++ Created on the UI thread and can be executed only once 
++ Run on a background thread and result is published on the UI thread 
+
++ The three types used by an asynchronous task are the following 
+– Params, the type of the parameters sent to the task upon execution 
+– Progress, the type of the progress units published during the background computation 
+– Result, the type of the result of the background computation 
++ Extend AsyncTask<Void, Void, Void>
 
 The basic methods used in an android AsyncTask class are defined below :
 
-+ doInBackground() : This method contains the code which needs to be executed in background. In this method we can send results multiple times to the UI thread by publishProgress() method. To notify that the background processing has been completed we just need to use the return statements
++ onPreExecute() : This method contains the code which is executed before the background processing starts. Invoked on the UI thread immediately after the task is executed.
 
-+ onPreExecute() : This method contains the code which is executed before the background processing starts
++ doInBackground(Param...) : This method contains the code which needs to be executed in background. In this method we can send results multiple times to the UI thread by publishProgress() method. To notify that the background processing has been completed we just need to use the return statements. Invoked on the background thread immediately after onPreExecute() finishes executing 
 
-+ onPostExecute() : This method is called after doInBackground method completes processing. Result from doInBackground is passed to this method
++ onPostExecute(Result) : This method is called after doInBackground method completes processing. Result from doInBackground is passed to this method. Invoked on the UI thread after the background computation finishes
 
-+ onProgressUpdate() : This method receives progress updates from doInBackground method, which is published via publishProgress method, and this method can use this progress update to update the UI thread
++ onProgressUpdate(Progress...) : This method receives progress updates from doInBackground method, which is published via publishProgress method, and this method can use this progress update to update the UI thread. Invoked on the UI thread after a call to publishProgress(Progress...) 
 
-The three generic types used in an android AsyncTask class are given below :
-
-+ Params : The type of the parameters sent to the task upon execution
-
-+ Progress : The type of the progress units published during the background computation
-
-+ Result : The type of the result of the background computation
+```java
+public class at extends AsyncTask< ArrayList<Item> , Void , ArrayList<Item> >{
+	@override
+	protected ArrayList<Item> doInBackground(ArrayList<Item>... params){
+		return itemList;
+	}
+	@override
+	protected void onProgressUpdate(Void... unused){
+	
+	}
+	@override
+	protected void onPostExecute(ArrayList<Item> sResponse){
+		// update ui
+	}
+}
+LoadItemList loadItemList = new LoadItemList();
+loadItemList.execute();
+```
 
 #### Handler 
 
@@ -151,49 +170,4 @@ public class ThreadExampleActivity extends ActionBarActivity {
 
 	}
 }
-```
-
----------------------------------------
-
-###### AsyncTask another explanation
-
-• Created on the UI thread and can be executed only once 
-• Run on a background thread and result is published on the UI thread 
-• The three types used by an asynchronous task are the following 
-– Params, the type of the parameters sent to the task upon execution 
-– Progress, the type of the progress units published during the background computation 
-– Result, the type of the result of the background computation 
-• Extend AsyncTask<Void, Void, Void>
-
-AsyncTask goes through 4 steps: 
-
-– onPreExecute(): 
-invoked on the UI thread immediately after the task is executed 
-
-– doInBackground(Param ...): 
-invoked on the background thread immediately after onPreExecute() finishes executing 
-
-– onProgressUpdate(Progress...): 
-invoked on the UI thread after a call to publishProgress(Progress...) 
-
-– onPostExecute(Result): 
-invoked on the UI thread after the background computation finishes
-
-```java
-public class at extends AsyncTask< ArrayList<Item> , Void , ArrayList<Item> >{
-	@override
-	protected ArrayList<Item> doInBackground(ArrayList<Item>... params){
-		return itemList;
-	}
-	@override
-	protected void onProgressUpdate(Void... unused){
-	
-	}
-	@override
-	protected void onPostExecute(ArrayList<Item> sResponse){
-		// update ui
-	}
-}
-LoadItemList loadItemList = new LoadItemList();
-loadItemList.execute();
 ```
