@@ -43,18 +43,6 @@ public static void main(String args[]) throws InterruptedException {
 }
 ```
 
-###### Notes regarding threads in Android
-
-`runOnUiThread`
-
-When you explicitly spawn a new thread to do work in the background, this code is not run on the UIThread. 
-If this background thread needs change the UI: use `runOnUiThread`. 
-Better to use a Handler.
-Handler provides these background threads the ability to execute code that can modify the UI. 
-Handler do this by putting the UI-modifying code in a Runnable object and passing it to the runOnUiThread method.
-
-https://developer.android.com/guide/components/processes-and-threads.html#WorkerThreads
-
 #### AsyncTask
 
 - Caller thread is a UI Thread. (The AsyncTask instance must be created and invoked in the UI thread.
@@ -168,4 +156,122 @@ public class ThreadExampleActivity extends ActionBarActivity {
 
 	}
 }
+```
+
+### Updating UI thread from a non-UI thread
+
+#### Handler (Best way)
+
+##### Handler posting runnable back to UI Thread
+
+Using java.lang.Runnable: `Handler.post(Runnable)`
+
+```java
+final Handler handler = new Handler(); // In UI Thread
+
+new Thread(new Runnable(){ // Not UI Thread
+    @Override
+    public void run() {
+            handler.post(new Runnable() { // Posting a runnable back to UI Thread
+                @Override
+                public void run() {
+                    doSomething(); // Posting a runnable back to UI Thread
+                }
+            });
+    }
+}).start();
+```
+
+Use Handler.postRunnable when you want to execute some code on the UI Thread without having to know anything about your Handler object. It makes sense in many cases where arbitrary code needs to be executed on the UI Thread.
+
+##### Handler sending message back to UI Thread
+
+Using android.os.Message: `Handler.sendMessage(Message)` / `Handler.handleMessage(Message)`
+
+```java
+final Handler handler = new Handler(){ // In UI Thread
+  @Override
+  public void handleMessage(Message msg) {
+    if(msg.what==CONSTANT_CODE){
+      images.get(msg.arg1).setImageBitmap((Bitmap) msg.obj); // doSomethingWithTheMessage
+    }
+    super.handleMessage(msg);
+  }
+};
+
+new Thread(new Runnable(){ // Not UI Thread
+    @Override
+    public void run() {
+	//if(dataArrives){
+	    Message msg = handler.obtainMessage();
+	    msg.what = CONSTANT_CODE;
+	    msg.obj = bitmap;
+	    msg.arg1 = index;
+	    handler.sendMessage(msg); // Send message back to UI Thread
+	//}
+    }
+}).start();
+```
+
+Initialize your non-UI thread,  passing it a Handler object. 
+When data arrives use the handler to send a message to the UI thread. 
+In the UI thread, when the message from the non-UI thread comes, just update the Views.
+
+Messages can be reused, so it results in fewer objects created and less GC. You also end up with fewer classes and anonymous types.
+
+One big advantage is that a class sending a Message to a Handler doesn't need to know anything about the implementation of that Message. That can aid in encapsulation depending on where it's used.
+
+In some cases you want to organise what is being sent to the UI Thread and have specific functions you want to execute that way you can use sendMessage.
+
+#### Activity.runOnUiThread(Runnable)
+
+runOnUiThread uses Handler. runOnUiThread() posts the Runnable to a Handler if the current thread is not the UI thread. If it is the UI thread, the runnable is executed synchronously - this is not always desirable.
+
+```java
+new Thread() {  
+    public void run() {  
+        //background task  
+
+        runOnUiThread(new Runnable() {  
+            public void run() {  
+                //UI callback  
+            }  
+        });  
+    }  
+}.start();
+```
+
+Activity.runOnUiThread() is a special case of more generic Handlers. With Handler you can create your own event query within your own thread. Using Handlers instantiated with default constructor doesn't mean "code will run on UI thread" in general. By default, handlers binded to Thread from which they was instantiated from.
+
+To create Handler that is guaranteed to bind to UI (main) thread you should create Handler object binded to Main Looper like this:
+
+`Handler mHandler = new Handler(Looper.getMainLooper());`
+
+Moreover, if you check the implementation of runOnuiThread() method, it is using Handler to do the things:
+
+```java
+  public final void runOnUiThread(Runnable action) {
+        if (Thread.currentThread() != mUiThread) {
+            mHandler.post(action);
+        } else {
+            action.run();
+        }
+    }
+```
+
+As you can see from code snippet above, Runnable action will be executed immediately, if runOnUiThread() is called from the UI thread. Otherwise, it will post it to the Handler, which will be executed at some point later.
+
+#### AsyncTask
+
+AsyncTask uses handler. AsyncTask#finish() that calls onPostExecute() is called from a Handler message loop.
+
+```java
+new AsyncTask<X, Void, Z>() {  
+    protected Boolean doInBackground(X... params) {  
+        //background task  
+    }  
+    protected void onPostExecute(Z res) {  
+        //UI callback  
+    }  
+}.execute();
 ```
